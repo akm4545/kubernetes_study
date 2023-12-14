@@ -1,0 +1,19 @@
+apiVersion: apps/v1 #api 버전
+kind: Deployment #오브젝트 종류
+metadata:
+  name: echo-hname #디플로이먼트 이름
+  labels: #레이블
+    app: nginx
+spec:
+  replicas: 3 #파드 개수 지정
+  selector:
+    matchLabels:
+      app: nginx
+  template: #템플릿 컨테이너 설정
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: echo-hname
+        image: sysnet4admin/echo-hname #컨테이너에 사용될 이미지
