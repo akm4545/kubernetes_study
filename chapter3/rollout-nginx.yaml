@@ -1,0 +1,17 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:  
+  name: rollout-nginx #디플로이먼트 명 
+spec: 
+  replicas: 3 #레플리카셋 수
+  selector: #셀렉터 레이블
+    matchLabels:
+      app: nginx
+  template: 
+    matadata: #템플릿 레이블
+      labels:
+        app: nginx
+    spec: #템플리에서 사용할 컨테이너 지정 
+      containers: 
+      - name: nginx
+        image: nginx:1.15.12
