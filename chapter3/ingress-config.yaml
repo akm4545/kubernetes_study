@@ -1,0 +1,25 @@
+#여러개의 디플로이먼트를 관리하기 위한 인그레스 컨트롤러 구성
+#노드 포트 + 여러 디플로이먼트 = 인그레스 컨트롤러 사용
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-nginx # 인그레스 명
+  anootations: # 메타데이터의 기록 및 변경 rewrite-target을 /(기본주소) 로 지정
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules: # 규칙 지정
+  - http:
+      paths:
+      - path: # 기본 경로 규칙
+        backend: #연결되는 서비스와 포트
+          serviceName: hname-svc-default
+          servicePort: 80
+      - path: /ip #기본경로에 ip 경로가 붙을 시 처리 
+        backend:
+          serviceName: ip-svc
+          servicePort: 80
+      - path: /your-directory #위와 동일
+        backend:
+          serviceName: your-svc
+          servicePort: 80
+       

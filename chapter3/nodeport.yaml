@@ -1,10 +1,10 @@
-#외부에서 접속하기 위한 서비스를 설정 (노트포드)
+#외부에서 접속하기 위한 서비스를 설정 (노드포트)
 apiVersion: v1
 kind: Service #서비스 타입
 metadata: #서비스 명
   name: np-svc
 spec:
-  selector: #셀렉터 레이블 지정
+  selector: #셀렉터 레이블 지정 -> 노트포트의 스펙에 적힌 np-pods와 디플로이먼트의 이름을 확인해 동일하면 같은 파드로 간주
     app: np-pods
   ports: #사용할 프로토콜과 포트들을 지정
     - name: http
