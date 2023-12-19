@@ -1,8 +1,29 @@
+# 1. 인그레스 컨트롤러 설치
+# 2. 인그레스 컨트롤러 설정 
+# 3. 노드포트로 인그레스 컨트롤러를 외부와 통신할 수 있도록 함
+# 4. expose 명령으로 디플로이먼트도 서비스로 노출 (외부통신을 위한 파드 노출)
+
+#작동 순서 
+#1. 인그레스 컨트롤러를 외부와 통신이 가능하도록 설정한 노드포트의 30100로 접근 
+#100.100.100.100:30100/ip
+# 워커노드:30100 
+#2. 노드포트가 해당 포트가 포트로 포트포워딩 
+# 30100 -> 80 번 포트 
+# 100.100.100.100:80[servicePort에 대응]/ip[path에 대응]
+#3. 인그레스 컨트롤러 설정에서 해당 포트와 주소, 엮인 서비스를 보고 찾아감 (디플로이먼트를 서비스로 노출시켰으므로)
+#- path: /ip 
+#        backend:
+#          serviceName: ip-svc [디플로이먼트를 서비스로 선언한 이름]
+#          servicePort: 80
+
+
+# 인그레스 컨트롤러 설정 path의 /ip 의 주소로 들어오게 되면 serviceName으로 로 지정한 80
+
 apiVersion: v1
-kind: Service
+kind: Service #Service = 외부통신?
 metadata:
-  name: nginx-ingress-controller
-  namespace: ingress-nginx
+  name: nginx-ingress-controller #서비스 이름
+  namespace: ingress-nginx # 네임스페이스 이름 -> ingress controller를 설치하면서 namespace를 설정한 이름과 같음
 spec:
   ports:
   - name: http
