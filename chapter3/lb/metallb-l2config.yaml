@@ -11,7 +11,8 @@ data:
       addresses:
       - 192.168.1.11-192.168.1.13
 
+# metallb 는 따로 설치한 뒤 해당 configMap 으로 설정
 # address-pools = metallb의 세부 설정
 # protocol = metallb에서 제공하는 로드벨런서 동작 방식
 # addresses = metallb에서 제공하는 로드벨런서의 Ext 주소
-
+# 인그레스 컨트롤러와 마찬가지로 디플로이먼트를 expose --type=LoadBalancer 명령어로 서비스로 노출시켜야함
