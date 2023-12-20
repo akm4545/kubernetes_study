@@ -1,12 +1,17 @@
 apiVersion: v1
-kind: ConfigMap
+kind: ConfigMap #configMap
 metadata:
   namespace: metallb-system
-  name: config
+  name: config #configMap 이름
 data:
-  config: |
-    address-pools:
+  config: | #설정 내용
+    address-pools: 
     - name: nginx-ip-range
       protocol: layer2
       addresses:
       - 192.168.1.11-192.168.1.13
+
+# address-pools = metallb의 세부 설정
+# protocol = metallb에서 제공하는 로드벨런서 동작 방식
+# addresses = metallb에서 제공하는 로드벨런서의 Ext 주소
+
