@@ -1,0 +1,19 @@
+# deployment를 autoscale로 cpu 사용량, 최소, 최대 파드 수 설정
+#requests:
+#  cpu: "10m"
+#해당 항목으로 cpu-percent 계산
+
+#1. 메트릭스 서버에 파드를 생성하면서 설정한 리소스 정보와 사용량을 넘김
+#2. 메트릭스 서버는 해당 정보를 api 서버로 전달 
+#3. api 서버는 해당 정보를 autoscaler에 전달하여 설정한 기준치를 넘으면 scale 요청
+
+spec:
+  container:
+  - image: ....
+  #부하량 설정
+  # hpa 설정을 위해 필요 (메트릭스 서버)
+    resouces:
+      requests:
+        cpu: "10m"
+      limits:
+        cpu: "50m"

@@ -7,6 +7,8 @@
 #파드의 자원 계측값을 전달받는 메트릭 서버 설치
 #해당 파일은 TLS 인증 무시와 kubelet이 내부 주소를 우선 사용하도록 설정해 놓음
 
+#오브젝트 스펙 파일에 resource 부분 request, limits로 부하량 설정
+
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
