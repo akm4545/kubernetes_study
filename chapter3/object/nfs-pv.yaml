@@ -10,10 +10,10 @@ metadata:
   name: nfs-pv
 spec:
   capacity:
-    storage: 100Mi
-  accessModes:
-    - ReadWriteMany
-  persistentVolumeReclaimPolicy: Retain
-  nfs:
+    storage: 100Mi #쓸 수 있는 사용량을 레이블에 붙임
+  accessModes: #PV 사용방식 정의
+    - ReadWriteMany #여러 개의 노드가 읽고 쓸 수 있도록 마운트 ReadWriteOne 이나 ReadOnlyMany 옵션이 있음
+  persistentVolumeReclaimPolicy: Retain #PVC가 제거됐을 때 PV가 작동하는 방법 정의 Retain = 유지 Delete, Recycle옵션이 있음
+  nfs: #NFS 서버의 연결 위치에 대한 설정
     server: 192.168.1.10
     path: /nfs_shared
