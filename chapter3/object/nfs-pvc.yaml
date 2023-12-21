@@ -1,0 +1,12 @@
+#PVC = 사용자가 PV로 만든 볼륨을 요청하는데 사용
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nfs-pvc
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Mi
