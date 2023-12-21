@@ -12,13 +12,13 @@ spec:
       labels:
         app: nfs-pvc-deploy
     spec:
-      containers:
+      containers: #파드에서 사용할 컨테이너 설정
       - name: audit-trail
         image: sysnet4admin/audit-trail
-        volumeMounts:
+        volumeMounts: #볼륨이 마운트될 위치(/audit)
         - name: nfs-vol
           mountPath: /audit
-      volumes:
+      volumes: #PVC로 생성된 볼륨을 마운트 하기 위해 nfs-pvc 이름 사용
       - name: nfs-vol
         persistentVolumeClaim:
-          claimName: nfs-pvc
+          claimName: nfs-pvc #PVC를 생성할때 만든 이름
