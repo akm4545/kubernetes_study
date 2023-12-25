@@ -1,0 +1,31 @@
+#스테이트풀셋
+#파드가 만들어지는 이름과 순서를 예측해야 할 때 사용
+#마스터 - 슬레이브 구조 시스템에 필요 (레디스, 주키퍼 등등)
+#각 파드가 순서대로 생성되어 고정된 이름, 볼륨, 설정 등을 가질 수 있다
+#volumeClaimTemplates 기능을 사용하여 PVC를 자동 생성할 수 있다
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: nfs-pvc-sts
+spec:
+  replicas: 4
+  serviceName: sts-svc-domain #statefulSet 추가사항
+  selector:
+    matchLabels:
+      app: nfs-pvc-sts
+  template:
+    metadata:
+      labels:
+        app: nfs-pvc-sts
+    spec:
+      containers:
+      - name: audit-trail
+        image: sysnet4admin/audit-trail
+        volumeMounts:
+        - name: nfs-vol
+          mountPath: /audit
+      volumes:
+      - name: nfs-vol
+        persistentVolumeClaim:
+          claimName: nfs-pvc    
