@@ -3,6 +3,7 @@
 #마스터 - 슬레이브 구조 시스템에 필요 (레디스, 주키퍼 등등)
 #각 파드가 순서대로 생성되어 고정된 이름, 볼륨, 설정 등을 가질 수 있다
 #volumeClaimTemplates 기능을 사용하여 PVC를 자동 생성할 수 있다
+#스테이트풀셋은 expose명령으로 서비스를 생성 할 수 없어 오브젝트파일로 생성해야 한다
 
 apiVersion: apps/v1
 kind: StatefulSet

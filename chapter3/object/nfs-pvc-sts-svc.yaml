@@ -1,0 +1,16 @@
+#스테이스풀셋을 서비스로 만들기 위한 파일
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: nfs-pvc-sts-svc
+spec:
+  selector:
+    app: nfs-pvc-sts #스테이트풀셋 메타데이터 네임
+  ports:
+    - port: 80 #노출 포트
+  type: LoadBalancer #로드 벨런서로 외부 노출
+  #clusterIP: None = 헤드리스 서비스로 노출 (IP를 가지지 않는 서비스 타입)
+  #스테이트풀셋과 같은 상태를 가지고 있는 오브젝트를 모두 노출하지 않고 상태값을 외부에
+  #알리고 싶은 것만 선택적 노출 가능 
+  #일반적으로 스테이트풀셋은 헤드리스 서비스로 노출

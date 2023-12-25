@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: dynamic-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Gi
+#storageClassName을 생략하면 기본값은 standard 할당 
+#클라우드 업체별로 storage이름 다름
+#해당 PVC의 요청에 따라 PV가 생성
+#사용할 디플로이 파일에서 persistentVolumeClaim을 해당 PVC로 설정하면 됨

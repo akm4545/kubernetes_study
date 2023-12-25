@@ -1,0 +1,10 @@
+#클라우드 스토리지에서 PVC의 요청을 받아 동적으로 할당하기 위해 사용
+
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: standard #해당 이름으로 호출이 들어오면 동적 스토리지 제공
+provisioner: kubernetes.io/gce-pd
+parameters:
+  type: pd-standard
+  replication-type: none
