@@ -1,0 +1,16 @@
+#배포시 커스터마이즈 사용
+#매니페스트의 일부 내용을 가변적으로 변경해 사용 가능
+#resources 항목의 조합으로 생성하는듯 함 -> 환경에 따라 변경이 있을 시 resources 변경 
+#kustomize create 명령으로 아래 파일을 만들고 해당 파일을 kustomize build 로 오브젝트 파일 생성
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespace.yaml
+  - metallb.yaml
+  - metallb-l2config.yaml
+namespace: metallb-system
+imgaes:
+  - name: metallb/controller
+    newTag: v0.8.2
+  - name: metallb/speaker
+    newTag: v0.8.2

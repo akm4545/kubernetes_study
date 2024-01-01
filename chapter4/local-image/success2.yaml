@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: failure2
+  name: failure2
+spec:
+  replicas: 1
+  selector:
+    matchLables:
+      app: failure2
+  strategy: { }
+  template:
+    matadata:
+      creationTimestamp: null
+      labels:
+        app: failure2
+    spec:
+      containers:
+      #해당 스펙으로 사용하면 워커 노드들에도 아래 이미지가 존재해야 파드를 생성 가능
+      - #image: multistage-img
+        #로컬 이미지를 사용하기 위해 추가
+        #imagePullPolicy: Never
+
+        #사설 레지스트리에서 불러오도록 이미지명 수정
+        - image: 192.168.1.10:8443/multistage-img
+        name: multistage-img
+        resources: { }
+status: {}
