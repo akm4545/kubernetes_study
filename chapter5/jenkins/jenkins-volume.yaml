@@ -1,0 +1,31 @@
+#PVC는 요청에 맞는 PV가 존재 시 자동 바인딩 
+#원하는 PV가 존재하지 않을 때는 대기하다가 원하는 PV가 생길면 바인딩
+
+#젠킨스가 사용할 PV
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: jenkins
+spec:
+  capacity:
+    storage: 10Gi #사용량
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  nfs: #nfs서버 정보
+    server: 192.168.1.10
+    path: /nfs_shared/jenkins
+---
+
+#젠킨스가 사용할 PVC
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: jenkins
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi
