@@ -67,11 +67,16 @@ pipeline {
                         sh '''
                         // 콘피그맵 배포
                         kubectl apply -f configmap.yaml
+                        // deployment.yaml을 소스파일로 kustomization.yaml 생성
                         kustomize create --resources ./deployment.yaml
                         echo "deploy new deployment"
+                        // add = 추가, set = 덮어쓰기 인듯
+                        // 레이블 추가
                         kustomize edit add label deploy:$tag -f
+                        // 모든 리소스 네임에 접미사 추가
                         kustomize edit set namesuffix -- -$tag
                         kustomize edit set image sysnet4admin/dashboard:$tag
+                        // kustomize로 야믈 파일 생성과 동시에 배포
                         kustomize build . | kubectl apply -f -
                         echo "retrieve new deployment"
                         kubectl get deployments -o wide
@@ -80,26 +85,37 @@ pipeline {
                 }
             }
         }
+        // 로드밸런서
         stage('switching LB'){
             steps{
+                // 작업할 컨테이너
                 container('kustomize'){
+                    // 작업 디렉토리
                     dir('service'){
                         sh '''
                         kustomize create --resource ./lb.yaml
                         while true;
                         do
+                        //리눅스 export 명령어로 변수 생성
+                        //배포 홀수, 짝수에 맞는 tag[blue, green]에 맞는 deployment의 replicase 할당
+                        //kustomize edit add label deploy:$tag -f 로 deploy에 tag 값을 초기화 했었음
                           export replicase=$(kubectl get deployments \
                           --selector=app=dashboard,deploy=$tag \
                           -o jsonpath --template="{.items[0].status.replicas}")
+                        //   위와 같음
                           export ready=$(kubectl get deployments ]
                           --selector=app=dashboard,deploy=$tag \
                           -o jsonpath --template="{.items[0].status.readyReplicas}")
                           echo "total replicas: $replicas, ready replicas: $ready"
+                        //바뀐 버전이 모두 배포가 완료되었으면
                           if [ "$ready" -eq "$replicas" ]; then
                             echo "tag change and build deployment file by kustomize"
+                            // lb.yaml에 deploy 항목 추가 [blue, green]
                             kustomize edit add label deploy:$tag -f
+                            // metalLb 배포
                             kustomize build . | kubectl apply -f -
                             echo "delete $tag deployment"
+                            // 이전 배포 항목 삭제 [blue, green]
                             kubectl delete deployment --selector=app=dashboard,deploy!=$tag
                             kubectl get deployments -o wide
                             break
