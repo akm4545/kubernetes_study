@@ -1,11 +1,14 @@
 pipline{
     agent any
     stages{
+        // 깃허브 저장소에서 야믈 파일 받기
         stage('git pull'){
             steps{
                 git url: 'https://github.com/akm4545/k8s-GitOps-study.git', branch: 'main'
             }
         }
+        // 미리 설정한 kubeconfig 자격 증명을 이용해 현재 내려받은 경로에 존재하는 야믈 파일들의 내용을
+        // 쿠버네티스 클러스터에 배포
         stage('k8s deploy'){
             steps{
                 kubernetesDeploy(kubeconfigId: 'kubeconfig', configs: '*.yaml')
