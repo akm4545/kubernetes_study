@@ -1,0 +1,37 @@
+// 선언적 문법 시작 
+pipeline {
+    // 수행할 에이전트 지정
+    agent any
+    // stage 묶음
+    stages {
+        // 빌드 진행시 stage 별로 확인 가능
+        stage('git scm update'){
+            // 실제 작업
+            steps{
+                // 소스코드 내려받기
+                git url: 'https://github.com/IaC-Source/echo-ip.git', branch: 'main'
+            }
+        }
+        stage('docker build and push'){
+            steps {
+                // 도커 이미지 빌드 및 레지스트리에 푸시 
+                // sh 작업을 통해 작업
+                sh '''
+                docker build -t 192.168.1.10:8443/echo-ip .
+                docker push 192.168.1.10:8443/echo-ip
+                '''
+            }
+        }
+        stage('deploy kubernetes'){
+            steps {
+                // 도커로 빌드한 이미지로 디플로이먼트 배포
+                // 외부 노출을 위한 로드밸런서 타입 지정
+                sh '''
+                kubectl create deployment pl-bulk-prod --image=192.168.1.10:8443/echo-ip
+                kubectl expose deployment pl-bulk-prod --type=LoadBalancer --port=8080 \
+                                                       --target-port=80 --name=pl-bulk-prod-svc
+                '''
+            }
+        }
+    }
+}

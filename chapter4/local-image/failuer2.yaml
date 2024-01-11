@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: failure2
+  name: failure2
+spec:
+  replicas: 1
+  selector:
+    matchLables:
+      app: failure2
+  strategy: { }
+  template:
+    matadata:
+      creationTimestamp: null
+      labels:
+        app: failure2
+    spec:
+      containers:
+      - image: multistage-img
+        #로컬 이미지를 사용하기 위해 추가
+        imagePullPolicy: Never
+        name: multistage-img
+        resources: { }
+status: {}

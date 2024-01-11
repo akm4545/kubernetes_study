@@ -1,0 +1,28 @@
+#인증서 생성을 위한 서명 요청서 (CSR)
+
+[req]
+#하단의 [private_registry_cert_req] 항목의 정보를 이용해 인증서 생성
+distinguished_name = private_registry_cert_req
+#하단의 [v3_req] 항목을 이용해 추가 정보 사용
+x509_extensions = v3_req
+prompt = no
+
+#인증서 요청자의 국가, 도시, 소속, 이름, 인증서 설치의 서버 수조 등의 정보
+[private_registry_cert_req]
+C = KR
+ST = SEOUL
+L = SEOUL
+O = gilbut
+OU = Book_k8sInfra
+CN = 192.168.1.10
+
+#키의 목적, 주체 대체 이름
+[v3_req]
+keyUsage = keyEncipherment, dataEncipherment
+extendedKeyUsage = serverAuth
+subjectAltName = @alt_names
+
+#도메인 이름과 사이트가 일치하는지 확인할 때 사용하는 추가적인 정보
+[alt_names]
+DNS.0 = m-k8s
+IP.0 = 192.168.1.10

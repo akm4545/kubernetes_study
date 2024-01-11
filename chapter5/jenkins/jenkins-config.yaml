@@ -1,0 +1,143 @@
+#젠킨스 설정 파일 (젠킨스 에이전트 설정)
+#젠킨스 에이전트 파드가 빌드 요청시 생성 -> 파드 내부 컨테이너 생성 -> 빌드 후 제거
+#해당 설정은 젠킨스 관리 페이지의 Configure Clouds에서 수정 가능
+jenkins:
+  agentProtocols:
+  - "JNLP4-connect"
+  - "Ping"
+  authorizationStrategy:
+    loggedInUsersCanDoAnything:
+      allowAnonymousRead: false
+  clouds:
+  - kubernetes:
+      containerCap: 10
+      containerCapStr: "10"
+      jenkinsTunnel: "jenkins-agent:50000"
+      jenkinsUrl: "http://jenkins:80"
+      maxRequestsPerHost: 32
+      maxRequestsPetHostStr: "32"
+      name: "kubernetes"
+      namespace: "default"
+      podLabels:
+      - key: "jenkins/jenkins-jenkins-slave"
+        value: "true"
+      serverUrl: "https://kubernetes.default"
+      templates:
+      #파드에서 사용할 컨테이너 
+      - containers:
+        - args: "^${computer.jnlpmac} ^${computer.name}"
+          command: ""
+          #컨테이너 환경변수
+          envVars:
+          - envVar:
+              key: "JENKINS_URL"
+              value: "http://192.168.1.11"
+          #도커 이미지
+          image: "jenkins/inbound-agent:4.3-4"
+          livenessProbe:
+            failureThreshold: 0
+            initialDelaySeconds: 0
+            periodSeconds: 0
+            successThreshold: 0
+            timeoutSeconds: 0
+          #컨테이너 명
+          name: "jnlp"
+          resourceLimitCpu: "512m"
+          resourceLimitMemory: "512Mi"
+          resourceRequestCpu: "512m"
+          resourceRequestMemory: "512Mi"
+          workingDir: "/home/jenkins"
+        hostNetwork: false
+        #젠킨스 에이전트 노드 구분 레이블
+        label: "jenkins-jenkins-slave "
+        #파드 템플릿 명
+        name: "default"
+        #노드 사용 방법? NORMAL = Use this node ad much as possible
+        nodeUsageMode: NORMAL
+        podRetention: "never"
+        #젠킨스 에이전트 파드에서 사용할 서비스 어카운트와 사용자 ID, 그룹 ID
+        runAsGroup: "993"
+        runAsUser: "1000"
+        #쿠버네티스 클러스터 및 오브젝트 정보 조회를 위한 계정
+        #해당 계정으로 쿠버네티스 api 서버와 통신하기 위해서는 권한이 필요하며 따로 설정해야함
+        #kubectl create clusterrolebinding jenkins-cluster-admin --culsterrole=cluster-admin --serviceaccount=defualt:jenkins
+        serviceAccount: "jenkins"
+        #생성된 파드의 볼륨을 hostPath로 설정하여 도커나 쿠버네티스의 명령어를 파드 내부에서
+        #사용할 수 있도록 설정
+        #볼륨 설정은 이 외에도 여러가지가 있음
+        volumes:
+        - hostPathVolume:
+            hostPath: "/usr/bin/kubectl"
+            mountPath: "/usr/bin/kubectl"
+        - hostPathVolume:
+            hostPath: "/bin/docker"
+            mountPath: "/bin/docker"
+        - hostPathVolume:
+            hostPath: "/var/run/docker.sock"
+            mountPath: "/var/run/docker.sock"
+        yamlMergeStrategy: "override"
+  crumbIssuer:
+    standard:
+      excludeClientIPFromCrumb: true
+  disableRememberMe: false
+  disabledAdministrativeMonitors:
+  - "hudson.model.UpdateCenter$CoreUpdateMonitor"
+  - "jenkins.diagnostics.RootRulNotSetMonitor"
+  - "jenkins.security.UpdateSiteWarningsMonitor"
+  labelAtoms:
+  - name: "master"
+  markupFormatter: "plainText"
+  mode: NORMAL
+  myViewsTabBar: "standard"
+  numExecutors: 0
+  primaryView:
+    all:
+      name: "all"
+  projectNamingStrategy: "standard"
+  quietPeriod: 5
+  remotingSecurity:
+    enabled: true
+  scmCheckoutRetryCount: 0
+  securityRealm: "legacy"
+  slaveAgentPort: 50000
+  updateCenter:
+    sites:
+    - id: "default"
+      url: "https://raw.githubusercontent.com/IaC-Source/Jenkins-updateCenter/main/update-center.json"
+  views:
+  - all:
+      name: "all"
+  viewsTabBar: "standard"
+security:
+  apiToken:
+    creationOfLegacyTokenEnabled: false
+    tokenGenerationOnCreationEnabled: false
+    usageStatisticsEnabled: true
+  sSDH:
+    port: -1
+unclassified:
+  buildDiscarders:
+    configuredBuildDiscarders:
+    - "jobBuildDiscarder"
+  fingerprints:
+    fingerprintCleanupDisabled: false
+    storage: "file"
+  gitSCM:
+    createAccountBasedOnEmail: false
+    showEntireCommitSummaryInChanges: false
+    useExistingAccountWithSameEmail: false
+  junitTestResultStorage:
+    storage: "file"
+  location:
+    adminAddress: "address not configured yet <nobody@nowhere>"
+  mailer:
+    charset: "UTF-8"
+    useSsl: false
+    useTls: false
+  pollSCM:
+    pollingThreadCount: 10
+tool:
+  git:
+    installations:
+    - home: "git"
+      name: "Default"

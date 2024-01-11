@@ -1,0 +1,132 @@
+pipeline {
+    agent {
+        // 에이전트를 쿠버네티스로 변경 (동적 변경 오브젝트 값을 설정하기 위해 kustomize 도구를 사용해야 하기 때문)
+        kubernetes {
+            // 에이전트로 사용할 파드의 명세를 야믈 형태로 정의
+            // 젠킨스에서 배포용으로 사용할 파드
+            yaml '''
+            apiVersion: v1
+            kind: Pod
+            metadata:
+              labels:
+                app: blue-green-deploy
+              name: blue-green-deploy
+            spec:
+            // 해당 파드에서 사용할 컨테이너
+              containers:
+              - name: kustomize
+            //   kustomize 사용
+                image: sysnet4admin/kustomize:3.6.1
+                tty: true
+                // 볼륨 마운트
+                volumeMounts:
+                - mountPath: /bin/kubectl
+                  name: kubectl
+                command:
+                - cat
+                // 젠킨스 배포 파드에서 쿠버네티스 클러스테어 오브젝트를 배포하기 위한 어카운트 설정
+              serviceAccount: jenkins
+            //   kubectl을 사용하기 위해 볼륨 설정
+              volumes:
+              - name: kubectl
+                hostPath:
+                  path: /bin/kubectl
+            '''
+        }
+    }
+    stages {
+        // 소스코드 받아오기
+        stage('git scm update'){
+            steps {
+                git url: 'https://github.com/IaC-Source/blue-green.git', branch: 'main'
+            }
+        }
+        stage('define tag'){
+            steps{
+                // 젠킨스 스크립트
+                script {
+                    if(env.BUILD_NUMBER.toInteger() % 2 == 1){
+                        // 빌드횟수 홀수
+                        // tag 환경변수 설정
+                        env.tag = "blue"
+                    }else{
+                        // 빌드횟수 짝수
+                        env.tag = "green"
+                    }
+                }
+            }
+        }
+        // 대시보드 배포를 위한 configMap 배포 후 디플로이먼트 배포
+        stage('deploy configmap and deployment'){
+            steps{
+                // 파드 내부에 배포된 컨테이너 kustomize에서 작업 실행
+                container('kustomize'){
+                    // 작업 대상 디렉토리 (깃에서 내려받은 파일 기준)
+                    // git/deployment
+                    dir('deployment'){
+                        sh '''
+                        // 콘피그맵 배포
+                        kubectl apply -f configmap.yaml
+                        // deployment.yaml을 소스파일로 kustomization.yaml 생성
+                        kustomize create --resources ./deployment.yaml
+                        echo "deploy new deployment"
+                        // add = 추가, set = 덮어쓰기 인듯
+                        // 레이블 추가
+                        kustomize edit add label deploy:$tag -f
+                        // 모든 리소스 네임에 접미사 추가
+                        kustomize edit set namesuffix -- -$tag
+                        kustomize edit set image sysnet4admin/dashboard:$tag
+                        // kustomize로 야믈 파일 생성과 동시에 배포
+                        kustomize build . | kubectl apply -f -
+                        echo "retrieve new deployment"
+                        kubectl get deployments -o wide
+                        '''
+                    }
+                }
+            }
+        }
+        // 로드밸런서
+        stage('switching LB'){
+            steps{
+                // 작업할 컨테이너
+                container('kustomize'){
+                    // 작업 디렉토리
+                    dir('service'){
+                        sh '''
+                        kustomize create --resource ./lb.yaml
+                        while true;
+                        do
+                        //리눅스 export 명령어로 변수 생성
+                        //배포 홀수, 짝수에 맞는 tag[blue, green]에 맞는 deployment의 replicase 할당
+                        //kustomize edit add label deploy:$tag -f 로 deploy에 tag 값을 초기화 했었음
+                          export replicase=$(kubectl get deployments \
+                          --selector=app=dashboard,deploy=$tag \
+                          -o jsonpath --template="{.items[0].status.replicas}")
+                        //   위와 같음
+                          export ready=$(kubectl get deployments ]
+                          --selector=app=dashboard,deploy=$tag \
+                          -o jsonpath --template="{.items[0].status.readyReplicas}")
+                          echo "total replicas: $replicas, ready replicas: $ready"
+                        //바뀐 버전이 모두 배포가 완료되었으면
+                          if [ "$ready" -eq "$replicas" ]; then
+                            echo "tag change and build deployment file by kustomize"
+                            // lb.yaml에 deploy 항목 추가 [blue, green]
+                            kustomize edit add label deploy:$tag -f
+                            // metalLb 배포
+                            kustomize build . | kubectl apply -f -
+                            echo "delete $tag deployment"
+                            // 이전 배포 항목 삭제 [blue, green]
+                            kubectl delete deployment --selector=app=dashboard,deploy!=$tag
+                            kubectl get deployments -o wide
+                            break
+                          else
+                            sleep 1
+                          fi
+                        done
+                        '''
+                    }
+                }
+            }
+        }
+    }
+}

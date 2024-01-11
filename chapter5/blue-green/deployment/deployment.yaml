@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pl
+  labels:
+    app: dashboard
+spec:
+  selector:
+    matchLables:
+      app: dashboard
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: dashboard
+    spec:
+      containers:
+      - name: dashboard
+        image: sysnet4admin/dashboard
+        imagePullPolicy: Always
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/nginx/conf.d/
+        - name: log-volume
+          mountPath: /log
+        ports:
+        - containerPort: 80
+      volumes:
+        - name: config-volume
+          configMap:
+            name: dashboard-configmap
+        - name: log-volume
+          emptyDir:
+            {}
