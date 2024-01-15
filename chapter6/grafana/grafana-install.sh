@@ -11,3 +11,5 @@ helm install grafana edu/grafana \
 --set securityContext.runAsGroup=1000 \
 # 그라파나 초기 비밀번호 설정
 --set adminPassword="admin"
+
+sum(kube_pod_status_phase{pod=~"$Pod", namespace=~"$namespace"}) by (phase)
