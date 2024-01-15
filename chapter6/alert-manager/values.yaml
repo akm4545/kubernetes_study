@@ -2,9 +2,15 @@ serverFiles:
   alerting_rules.yml:
     groups:
     - name: Node
+    # 알림을 보낼 룰 설정
       rules:
-      - alert: NodeDown
+      # 제목
+      - alert: NodeDown 
+        # PromQL 표현식 참인경우 경보 발생
         expr: up{job="kubernetes-nodes"} == 0
+        # 문제 지속 시간
         for: 1m
+        # 하위 항목에 필요한 전달 메시지를 주석으로 기록
         annotations:
+        # 사용자 임의 지정 변수로 필요한 경보 내용 작성 가능
           description: kubernetes node {{ .Labels.instance }} down

@@ -12,6 +12,7 @@ helm upgrade prometheus edu/prometheus \
 --set server.baseURL="http://192.168.1.12" \
 --set server.service.loadBalancerIP="102.168.1.12" \
 --set server.extraFlags[0]="storage.tsdb.no-lockfile" \
+# 컨피그맵 덮어쓰기 prometheus-notifier-config 해야하는거 아닌가
 --set alertmanager.configMapOverrideName=notifier-config \
 --set alertmanger.securityContext.runAsGroup=1000 \
 --set alertmanger.securityContext.runAsUser=1000 \
